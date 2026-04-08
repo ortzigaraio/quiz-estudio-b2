@@ -1,0 +1,2546 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B2 Vocab Quiz</title>
+    <style>
+        /* --- ESTILOS GENERALES Y LAYOUT --- */
+        body {
+            background-color: #330099; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box; 
+        }
+
+        .container {
+            background-color: white;
+            color: #333;
+            border-radius: 20px; 
+            padding: 40px; 
+            width: 100%;
+            max-width: 700px; 
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 0 0 8px #9900ff;
+            text-align: center;
+        }
+
+        /* --- MENÚ PRINCIPAL --- */
+        .menu-title {
+            color: #330099;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .menu-subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .menu-btn {
+            background-color: #1368ce;
+            color: white;
+            padding: 20px; 
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px; 
+            cursor: pointer;
+            font-weight: 700;
+            box-shadow: 0 5px 0 #0f4a9b;
+            transition: all 0.1s ease-out;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-2px); 
+            background-color: #2d7fe0;
+            box-shadow: 0 7px 0 #0f4a9b;
+        }
+        
+        .menu-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 #0f4a9b;
+        }
+
+        /* --- QUIZ UI --- */
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #330099; 
+            font-size: 1.1em;
+        }
+        
+        .question-box {
+            background-color: #46178f;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            font-size: 2em;
+            font-weight: 700;
+            margin: 20px 0 35px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            word-wrap: break-word;
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px; 
+        }
+        
+        .btn {
+            padding: 20px; 
+            font-size: 1.2em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.1s ease-out;
+            color: white;
+            font-weight: 700;
+            min-height: 80px; 
+            box-shadow: 0 5px 0 rgba(0,0,0,0.2);
+        }
+
+        .btn:active:not([disabled]) {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.2);
+        }
+
+        .opt-0 { background-color: #e21b3c; box-shadow: 0 5px 0 #b30026; } 
+        .opt-1 { background-color: #1368ce; box-shadow: 0 5px 0 #0f4a9b; } 
+        .opt-2 { background-color: #e69018; box-shadow: 0 5px 0 #b36b00; } 
+        .opt-3 { background-color: #26890c; box-shadow: 0 5px 0 #1e6307; } 
+        
+        .correct { 
+            background-color: #26890c !important; 
+            box-shadow: 0 5px 0 #1e6307, 0 0 0 5px #90ee90 !important; 
+            transform: scale(1.02);
+        }
+        
+        .wrong { 
+            background-color: #e21b3c !important; 
+            opacity: 0.4 !important; 
+            box-shadow: none !important; 
+        }
+
+        .action-btn {
+            background-color: #ffc200; 
+            color: #333; 
+            margin-top: 25px; 
+            padding: 15px 30px; 
+            font-size: 1.1em; 
+            border: none;
+            border-radius: 10px; 
+            font-weight: 700;
+            cursor: pointer; 
+            box-shadow: 0 4px 0 #cc9900;
+            margin-right: 10px;
+        }
+
+        .action-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #cc9900;
+        }
+
+        .big-score { 
+            font-size: 4em; 
+            color: #330099; 
+            font-weight: 900; 
+        }
+
+        @media (max-width: 600px) { 
+            .container { padding: 20px; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+    // 1. PEGA AQUÍ TU CSV COMPLETO DE 1000 PALABRAS (Formato: Inglés,Español)
+    const rawCSV = `a turd,"un mojón, una porquería"
+ability,habilidad
+able,capaz
+abolish,abolir
+abroad,en el extranjero
+absolute,absoluto
+absorb,absorber
+absurd,absurdo
+abuse,abuso
+academic,académico
+academy,academia
+accelerate,acelerar
+accept,aceptar
+access,acceso
+accommodation,alojamiento
+accomplish,lograr
+account,cuenta
+accountant,contable
+accumulate,acumular
+accurate,preciso
+accuse,acusar
+ache,"dolor, dolor continuo"
+achieve,alcanzar
+acknowledge,reconocer
+acquire,adquirir
+act,"ley, acto"
+active,activo
+activist,activista
+actual,real
+actually,en realidad
+adapt,adaptar
+addiction,adicción
+address,abordar
+adequate,adecuado
+adjust,ajustar
+administer,administrar
+administration,administración
+adopt,adoptar
+advantage,ventaja
+adventure,aventura
+advertise,anunciar
+advice,consejo
+affair,asunto
+afford,permitirse
+afraid,"asustado, con miedo"
+agency,agencia
+aggressive,agresivo
+agreement,acuerdo
+agriculture,agricultura
+airline,aerolínea
+airport,aeropuerto
+algorithm,algoritmo
+alive,vivo
+alliance,alianza
+allocate,asignar
+allergy,alergia
+almost,casi
+alone,solo
+already,ya
+alter,alterar
+alternative,alternativa
+although,aunque
+amazing,asombroso
+ambassador,embajador
+ambitious,ambicioso
+ambulance,ambulancia
+amendment,enmienda
+among,"entre (no definido), en medio de"
+amount,cantidad
+analyse,analizar
+analysis,análisis
+angry,enfadado
+ankle,tobillo
+annoy,"molesto, enojado"
+announce,anunciar
+anonymous,anónimo
+anticipate,anticipar
+anxiety,ansiedad
+anxious,ansioso
+app,aplicación
+apparent,aparente
+appeal,apelación
+applicant,candidato
+apply,solicitar
+appoint,nombrar
+appointment,cita
+appreciate,apreciar
+approach,enfoque
+appropriate,apropiado
+approve,aprobar
+architecture,arquitectura
+argue,discutir
+argument,argumento
+arise,surgir
+armoury,armería
+armpit,axila
+arms,brazos
+arrange,"arreglar, organizar"
+array,"matriz, variedad, despliegue"
+arrest,arrestar
+arrive,llegar
+arrogant,arrogante
+arse,"culo, imbécil"
+art,arte
+article,artículo
+artificial,artificial
+as an envoy,como enviado
+ashamed,avergonzado
+asleep,dormido
+assault,asalto
+assembly,asamblea
+assess,evaluar
+asset,activo
+assign,asignar
+assignment,tarea
+assist,ayudar
+assume,asumir
+assure,asegurar
+asthma,asma
+atmosphere,atmósfera
+attach,"adjuntar, unir"
+attempt,intentar
+attend,asistir
+attention,atención
+attitude,actitud
+attract,atraer
+attractive,atractivo
+audience,audiencia
+authority,autoridad
+available,disponible
+avalanche,avalancha
+avoid,evitar
+awake,despierto
+aware,consciente
+awful,horrible
+awkward,incómodo
+ax,hacha
+azure,"azul celeste, azur"
+back,espalda
+background,"formación, contexto"
+backup,copia de seguridad
+bad,malo
+baggage,equipaje
+balance,equilibrio
+ballot,boleta
+ban,prohibir
+bandage,vendaje
+bankrupt,en bancarrota
+bare,"desnudo, descubierto"
+barely,apenas
+bargain,"negociar, trato, ganga"
+barrier,barrera
+basic,básico
+bathtub,bañera
+baying,"aullando, ladrando"
+bear,"oso, paciencia, aguantar"
+beat,"golpear, vencer, latido"
+beautiful,hermoso
+become,"convertirse en, llegar a ser"
+beg,suplicar
+beggar,mendigo
+behalf,en nombre de
+behave,"comportarse, portarse"
+behaviour,comportamiento
+belly,"barriga, vientre"
+belong,pertenecer
+bend,"doblar, curvar"
+beneficial,beneficioso
+benefit,beneficio
+beside,"además, al lado de, junto a"
+best,mejor
+bestow,"otorgar, conferir"
+bet,apuesta
+between,entre (definido)
+beyond,más allá
+bid,"oferta, pujar"
+big,grande
+bigot / bigote,"intolerante / bigote"
+billboard,valla publicitaria
+bin,"papelera, contenedor"
+bind,"unir, atar, enlazar, vincular"
+biodiversity,biodiversidad
+biology,biología
+bitter,amargo
+black,negro
+bladder,vejiga
+blame,culpar
+bland,"soso, insulso"
+blank,en blanco
+blank slate,borrón y cuenta nueva
+bleed,sangrar
+blender,"batidora, licuadora"
+blind,ciego
+blizzard,ventisca
+blog,blog
+blood,sangre
+bloom,"florecer, flor"
+blue,azul
+blunt,"contundente, desafilado, directo"
+board,embarcar
+boast,"alardear, presumir"
+bold,"valiente, audaz"
+bond,"vínculo, lazo"
+bone,hueso
+bone-dry and faded,seco y descolorido
+bonus,"prima, bono"
+boost,impulsar
+border,frontera
+boring,aburrido
+bossy,"mandón, autoritario"
+bother,"molestar, preocuparse"
+bound,"atado, destinado a, límite"
+boundary,"límite, frontera"
+bounty,recompensa
+brace,"prepararse, abrazadera"
+brain,cerebro
+branch,sucursal
+brand,marca
+brat,mocoso
+brave,valiente
+breach,incumplimiento
+breathe,respirar
+breed,"criar, raza"
+breeder,criador
+breeding ground,"caldo de cultivo, criadero"
+breeze,brisa
+bribe,"soborno, sobornar"
+bridge,puente
+brief,"breve, informar"
+bright,brillante
+brilliant,brillante
+bring,traer
+brisk,"enérgico, rápido, animado"
+broad,amplio
+broadcast,transmitir
+brown,marrón
+browser,navegador
+bruise,moretón
+brutal,brutal
+budget,presupuesto
+bully,acosar
+buns,"panecillos, nalgas"
+burden,carga
+burglar,ladrón
+burn,quemadura
+burrow,"madriguera, excavar, esconderse"
+bursts,"estallidos, ráfagas"
+business,negocio
+busy,ocupado
+button,botón
+by the way,por cierto
+cab,taxi
+cabin,cabina
+cable,cable
+calculate,calcular
+calm,tranquilo
+camera,cámara
+camp,campamento
+campaign,campaña
+campus,campus
+cancer,cáncer
+candidate,candidato
+capable,capaz
+capacity,capacidad
+capital,capital
+capture,capturar
+car,coche
+carbon footprint,huella de carbono
+care,cuidado
+career,carrera profesional
+careful,cuidadoso
+careless,descuidado
+carpet,alfombra
+carriage,vagón
+case,caso
+castle,castillo
+casual,casual
+casualty,"víctima, baja"
+catastrophe,catástrofe
+catch,coger
+category,categoría
+cater,abastecer
+cattle,ganado
+cause,causa
+cautious,cauteloso
+cave,cueva
+cease,cesar
+celebration,celebración
+censorship,censura
+certain,seguro
+certificate,certificado
+challenge,"desafío, reto"
+channel,canal
+char,carbonizar
+charge,"cobrar, cargar"
+charged,"acusado, cargado"
+charity,caridad
+charm,"encanto, hechizo"
+chase,"perseguir, persecución"
+chat,chatear
+cheap,barato
+cheat,engañar
+check-in,facturación
+cheerful,alegre
+chemistry,química
+chest,"pecho, cofre"
+chief,principal
+chores,tareas domésticas
+cinder,ceniza
+cinema,cine
+circumstance,circunstancia
+citizen,ciudadano
+civil,civil
+claim,reclamo
+clarify,aclarar
+clash,"choque, enfrentamiento"
+class,clase
+classic,clásico
+claw,garra
+clay,arcilla
+clean,limpio
+clear,"claro, despejado"
+clever,"listo, inteligente"
+client,cliente
+cliff,"acantilado, precipicio"
+climate,clima
+climate change,cambio climático
+clinic,clínica
+close,cercano
+clue,"pista, clave"
+clueless,sin pista
+clumsy,"torpe, tonto"
+cluster,"grupo, agrupar"
+coach,entrenador
+coast,costa
+code,código
+coffin,ataúd
+cold,frío
+collapse,colapsar
+colleague,colega
+collection,colección
+college,"universidad, colegio"
+colorful,colorido
+column,columna
+combat,combatir
+combine,combinar
+comfortable,cómodo
+comet,cometa
+comment,comentario
+commerce,comercio
+commercial,comercial
+commit,cometer
+committee,comité
+common,común
+communicate,comunicar
+community,comunidad
+company,empresa
+compare,comparar
+comparison,comparación
+compel,obligar
+compensation,compensación
+compete,competir
+competition,competición
+competitive,competitivo
+competitor,competidor
+compile,recopilar
+complain,quejarse
+complaint,queja
+complete,completar
+complex,complejo
+complicated,complicado
+comply,acatar
+component,componente
+compose,componer
+comprehend,comprender
+comprehensive,"exhaustivo, amplio"
+comprise,comprender
+conceal,ocultar
+concept,concepto
+concern,preocupación
+conclude,concluir
+conclusion,conclusión
+condition,condición
+conduct,conducir
+confess,confesar
+confident,seguro
+confine,confinar
+confirm,confirmar
+conflict,conflicto
+confront,confrontar
+confuse,confundir
+connect,conectar
+connection,conexión
+conquer,conquistar
+conscious,consciente
+consequence,consecuencia
+conservative,conservador
+conservation,conservación
+consider,considerar
+considerable,considerable
+consist,consistir
+console,consolar
+constant,constante
+constitute,constituir
+constitution,constitución
+construct,construir
+consult,consultar
+consume,consumir
+consumer,consumidor
+contain,contener
+contemplate,contemplar
+contemporary,contemporáneo
+contend,lidiar
+content,contenido
+contest,disputar
+context,contexto
+continent,continente
+continuous,continuo
+contract,contrato
+contract binding,contrato vinculante
+contribute,contribuir
+contribution,contribución
+control,controlar
+controversy,controversia
+convenient,conveniente
+convention,convención
+conventional,convencional
+convert,convertir
+convey,transmitir
+convict,convicto
+convince,convencer
+cool,fresco
+cop,policía
+cope,hacer frente
+corporate,corporativo
+correct,correcto
+correspond,corresponder
+corrupt,corrupto
+cost,costo
+cough,tos
+council,ayuntamiento
+count,contar
+country,país
+county,condado
+course,curso
+court,tribunal
+cover,cubrir
+cozy,acogedor
+cramped,"estrecho, apretado"
+crash,choque
+crawlers,"rastreadores, gateadores"
+crazy,loco
+create,crear
+creative,creativo
+creed,credo
+creep,"arrastrarse, tipo raro"
+crew,tripulación
+crime,crimen
+criminal,criminal
+crisis,crisis
+crop,cultivo
+cross,cruzar
+crowds,multitudes
+crucial,crucial
+cruel,cruel
+cruise,crucero
+culture,cultura
+cupboard,"armario, alacena"
+cure,cura
+curious,curioso
+currency,moneda
+current,corriente
+curriculum,plan de estudios
+custom,costumbre
+customer,cliente
+customs,aduana
+cyberbullying,ciberacoso
+daily,diario
+dam,presa
+damage,dañar
+dangerous,peligroso
+dank,"lúgubre, húmedo y frío"
+dare,atreverse
+dark,oscuro
+data,datos
+database,base de datos
+daze,"aturdimiento, ofuscar"
+dead,muerto
+deadline,fecha límite
+deaf,sordo
+deal,tratar
+dealt,"repartido, tratado"
+dear,querido
+debate,debate
+debt,deuda
+decay,decaer
+deceive,engañar
+decent,decente
+decide,decidir
+deck,"cubierta, baraja"
+declare,declarar
+decline,rechazar
+decoy,señuelo
+decrease,disminuir
+dedicate,dedicar
+deed,"escritura, acto"
+deem,"considerar, juzgar"
+deep,profundo
+defeat,derrotar
+defend,defender
+defense,defensa
+deficit,déficit
+define,definir
+definite,definitivo
+deforestation,deforestación
+degree,título
+delay,retraso
+delegate,delegado
+deliberate,deliberado
+delicate,delicado
+deliver,entregar
+demand,demanda
+democracy,democracia
+demonstrate,demostrar
+dense,denso
+deny,negar
+depart,partir
+department,departamento
+departure,salida
+depend,depender
+dependent,dependiente
+depict,representar
+depress,deprimir
+depressed,deprimido
+depth,profundidad
+deputy,"diputado, ayudante"
+derive,derivar
+descend,descender
+describe,describir
+desertification,desertificación
+design,diseñar
+desire,desear
+desperate,desesperado
+despise,despreciar
+destination,destino
+destroy,destruir
+detail,detalle
+detailed,detallado
+detect,detectar
+determine,determinar
+develop,desarrollar
+device,dispositivo
+devote,dedicar
+diagnose,diagnosticar
+dictate,dictar
+diet,dieta
+differ,diferir
+difference,diferencia
+different,diferente
+difficult,difícil
+dig,"excavar, cavar"
+digest,digerir
+digital,digital
+dimension,dimensión
+diminish,disminuir
+diploma,diploma
+direct,directo
+dirty,sucio
+disable,deshabilitar
+disabled,discapacitado
+disadvantage,desventaja
+disagree,discrepar
+disappear,desaparecer
+disappoint,decepcionar
+disaster,desastre
+disastrous,desastroso
+discard,descartar
+discharge,descargar
+discipline,disciplina
+disclose,revelar
+discount,descuento
+discover,descubrir
+discovery,descubrimiento
+discrimination,discriminación
+discuss,discutir
+disease,enfermedad
+disgust,repugnar
+dismiss,despedir
+disorder,trastorno
+display,mostrar
+disposal,eliminación
+dispose,deshacerse
+dispute,disputa
+disrupt,interrumpir
+dissolve,disolver
+distance,distancia
+distant,distante
+distinct,distinto
+distinguish,distinguir
+distort,distorsionar
+distract,distraer
+distribute,distribuir
+disturb,perturbar
+ditch,"zanja, cuneta, abandonar"
+dive,bucear
+dive bar,bar de mala muerte
+divide,dividir
+diversity,diversidad
+divide,dividir
+division,división
+dizzy,mareado
+document,documento
+dodge,esquivar
+domestic,doméstico
+dominant,dominante
+dominate,dominar
+donate,donar
+dope,"droga, genial"
+dose,dosis
+double,doble
+doubt,duda
+doubtful,dudoso
+draft,"borrador, reclutar"
+drag,arrastrar
+drain,drenar
+dramatic,dramático
+drawing new people,atrayendo a gente nueva
+dread,temer
+drift,ir a la deriva
+drill,"taladro, perforar"
+drive,conducir
+driver,conductor
+drizzle,llovizna
+drop,dejar caer
+drought,sequía
+drown,ahogar
+drug,medicamento
+dry,seco
+dual,dual
+due to,debido a
+dull,"aburrido, sin filo"
+dump,tirar
+duty,deber
+eager,"ansioso, entusiasta"
+early,temprano
+earn,ganar
+ears,orejas
+earthquake,terremoto
+ease,facilitar
+east,este
+easy,fácil
+ecology,ecología
+economic,económico
+economy,economía
+ecosystem,ecosistema
+edit,editar
+edition,edición
+editor,editor
+educate,educar
+educated,educado
+education,educación
+effective,efectivo
+efficient,eficiente
+effort,esfuerzo
+elbow,codo
+elder,mayor
+elderly,anciano
+elect,elegir
+election,elección
+electric,eléctrico
+electronic,electrónico
+elegant,elegante
+element,elemento
+elementary,elemental
+elevate,elevar
+eliminate,eliminar
+email,correo electrónico
+embarrass,avergonzar
+embassy,embajada
+emerge,emerger
+emergency,emergencia
+emission,emisión
+emit,emitir
+emotion,emoción
+emotional,emocional
+emphasis,énfasis
+employ,emplear
+employee,empleado
+employer,empleador
+employment,empleo
+empty,vacío
+enable,permitir
+enchant,"encantar, hechizar"
+encounter,encontrar
+encourage,animar
+endangered,en peligro
+endure,"soportar, aguantar"
+energy,energía
+enforce,hacer cumplir
+engage,"involucrar, comprometer"
+engulfed,"envuelto, sumergido"
+engine,motor
+enhance,mejorar
+enjoy,disfrutar
+enormous,enorme
+ensure,asegurar
+enter,entrar
+enterprise,empresa
+entertain,entretener
+entertainment,entretenimiento
+entire,entero
+entitle,dar derecho a
+entrance,entrada
+entrepreneur,emprendedor
+environment,medio ambiente
+environmental,medioambiental
+epidemic,epidemia
+episode,episodio
+equal,igual
+equality,igualdad
+equip,equipar
+equipment,equipo
+errand,"recado, encargo"
+error,error
+escape,escapar
+essay,ensayo
+essential,esencial
+establish,establecer
+establishment,establecimiento
+estimate,estimar
+ethical,ético
+ethnic,étnico
+evaluate,evaluar
+even,incluso
+event,evento
+eventually,finalmente
+evidence,evidencia
+evolution,evolución
+evolve,evolucionar
+exact,exacto
+exaggerate,exagerar
+exam,examen
+examine,examinar
+example,ejemplo
+exceed,exceder
+excellent,excelente
+exception,excepción
+exchange,intercambio
+excite,emocionar
+exclude,excluir
+exclusive,exclusivo
+excuse,excusar
+execute,ejecutar
+executive,ejecutivo
+exercise,ejercicio
+exhaust,agotar
+exhibit,exhibir
+exhibition,exposición
+exist,existir
+existence,existencia
+exit,salida
+expand,expandir
+expansion,expansión
+expect,esperar
+expected,esperado
+expedition,expedición
+expense,gasto
+expensive,caro
+experience,experiencia
+experienced,experimentado
+experiment,experimento
+expert,experto
+explain,explicar
+explanation,explicación
+explode,explotar
+exploit,"explotar, aprovechar"
+exploits,"hazañas, explotar"
+explore,explorar
+export,exportar
+expose,exponer
+exposure,exposición
+expression,expresión
+extend,extender
+extensive,extenso
+extent,extensión
+external,externo
+extinct,extinto
+extra,adicional
+extract,extraer
+extraordinary,extraordinario
+extreme,extremo
+eyebrows,cejas
+eyelashes,pestañas
+face,enfrentar
+facility,instalación
+factor,factor
+fade,desvanecerse
+fail,fallar
+failure,fracaso
+faint,"desmayarse, leve"
+fair,"justo, feria"
+fake,falso
+fall station,estación de otoño
+false,falso
+familiar,familiar
+famine,hambruna
+famous,famoso
+fancy,"elegante, lujoso"
+far,lejos
+fare,tarifa
+farewell,"despedida, adiós"
+farming,agricultura
+fascinate,fascinar
+fast,rápido
+fatal,fatal
+fatty geek shit,basura de friki gordo
+favorable,favorable
+favorite,favorito
+fear,"miedo, temor"
+feat,"hazaña, logro"
+feature,característica
+feather,pluma
+federal,federal
+feet,pies
+fellow,"compañero, tipo"
+female,femenino
+festival,festival
+fetch,"ir a buscar, traer"
+fever,fiebre
+few,pocos
+fiancée,prometida
+figure,"figura, cifra, deducir"
+file,archivo
+fill,llenar
+finance,finanzas
+financial,financiero
+finding,hallazgo
+fine,multa
+fingers,dedos de la mano
+firm,firme
+fist,puño
+fit,en forma
+flat,"plano, piso"
+flaw,"defecto, falla"
+flee,huir
+flexible,flexible
+flight,vuelo
+float,flotar
+flood,inundación
+flow,fluir
+flu,gripe
+fluid,fluido
+focus,enfocarse
+fog,niebla
+fold,"doblar, plegar"
+folder,carpeta
+folk,"gente, el pueblo"
+follower,seguidor
+following,siguiente
+fond,encariñado
+foolish,tonto
+foot,pie
+footprint,huella
+forbid,prohibir
+force,fuerza
+forecast,pronóstico
+foreign,extranjero
+foreigner,extranjero
+forest,bosque
+forgive,perdonar
+formal,formal
+former,anterior
+forsake,"abandonar, renunciar"
+fort,"fuerte, fortaleza"
+fortunate,afortunado
+forward,hacia adelante
+fossil fuel,combustible fósil
+found,fundar
+foundation,base
+fracture,fractura
+framework,marco de referencia
+fraud,fraude
+fray,"refriega, lucha"
+free,libre
+freed,liberado
+freeze,congelar
+frequency,frecuencia
+frequent,frecuente
+fresh,fresco
+friendly,amigable
+frighten,asustar
+frightened,asustado
+front,delantero
+frustrate,frustrar
+fuel,combustible
+fulfil,cumplir
+full,lleno
+fun,divertido
+function,función
+fund,fondo
+funny,gracioso
+furnace,horno
+furniture,muebles
+further,"adicional, más lejos"
+future,futuro
+gadget,aparato
+gain,ganar
+game,juego
+gap,"brecha, hueco"
+garrulous,"locuaz, hablador"
+gate,puerta de embarque
+gather,"recolectar, reunir"
+gaze,"mirada, mirar fijamente"
+geek / geeks,"adicto, frikis"
+general,general
+generation,generación
+generous,generoso
+genius,genio
+gentle,suave
+genuine,genuino
+geography,geografía
+giant,gigante
+gig,"concierto, trabajillo"
+gist,"la esencia, el meollo"
+glacier,glaciar
+glad,contento
+glance,"vistazo, ojeada"
+glare,"mirada furiosa, resplandor"
+global,global
+global warming,calentamiento global
+glow,"brillar, resplandor"
+goal,meta
+golden,dorado
+good,bueno
+goods,"bienes, mercancías"
+gorgeous,precioso
+govern,gobernar
+government,gobierno
+grab,agarrar
+grade,nota
+graduate,graduarse
+grand,grandioso
+grant,"conceder, dado por sentado"
+grasp,comprender
+grateful,agradecido
+grave,"tumba, grave"
+great,genial
+greed,codicia
+green,verde
+greenhouse,invernadero
+greet,saludar
+gregarious,"sociable, gregario"
+grey,gris
+grief,dolor
+grind,"moler, rutina pesada"
+groom,"novio, acicalar"
+gross,asqueroso
+grovel,"arrastrarse, rebajarse"
+growing,creciente
+growth,crecimiento
+guarantee,garantizar
+guard,guardia
+guess,adivinar
+guest,invitado
+guide,guía
+guilt,culpa
+guilty,culpable
+gutter,"cuneta, alcantarilla"
+habit,hábito
+habitat,hábitat
+hail,"granizo, aclamar"
+half,mitad
+hall,"pasillo, vestíbulo"
+halt,"detener, alto"
+handle,manejar
+handy,útil
+hangover,resaca
+happy,feliz
+harass,acosar
+harbor,puerto
+hard,duro
+hardware,hardware
+harm,"daño, perjudicar"
+harsh,"duro, severo"
+harvest,cosecha
+haste,prisa
+haunt,"guarida, rondar"
+havoc,estragos
+hazardous,peligroso
+haze,"neblina, borroso"
+headline,titular
+heal,sanar
+health,salud
+healthy,saludable
+hearing,audición
+heart,corazón
+heartbeat,latido del corazón
+heat,calor
+heathen,pagano
+heatwave,ola de calor
+heavy,pesado
+heck,"diablos, infiernos"
+heed,prestar atención
+height,altura
+heir,heredero
+held,"sostenido, mantenido"
+helpful,útil
+herd,"rebaño, manada"
+heritage,patrimonio
+hero,héroe
+hesitate,dudar
+hidden,oculto
+high,alto
+highlight,resaltar
+highway,autopista
+hike,caminata
+hind legs,patas traseras
+hint,pista
+hire,contratar
+historic,histórico
+history,historia
+holiday,vacaciones
+hollow,hueco
+holy,"santo, sagrado"
+honest,honesto
+hooker,puta
+hope,esperanza
+hopeful,esperanzado
+horn,"bocina, cuerno"
+horrible,horrible
+hospital,hospital
+host,anfitrión
+hostile,hostil
+hotel,hotel
+housewarming,fiesta de inauguración
+hover,flotar
+however,sin embargo
+huge,enorme
+hug,abrazar
+human,humano
+humble,humilde
+humming,"tarareando, zumbido"
+hunger,hambre
+hurricane,huracán
+hygiene,higiene
+I am used,estoy acostumbrado
+ice cap,capa de hielo
+idea,idea
+ideal,ideal
+identical,idéntico
+identity,identidad
+ignore,ignorar
+illegal,ilegal
+illness,enfermedad
+illustrate,ilustrar
+image,imagen
+imagine,imaginar
+immediate,inmediato
+immense,inmenso
+immigration,inmigración
+immune,inmune
+impact,impacto
+impatient,impaciente
+implement,implementar
+implication,implicación
+imply,implicar
+import,importar
+importance,importancia
+important,importante
+impose,imponer
+impossible,imposible
+impress,impresionar
+impressive,impresionante
+improve,mejorar
+improvement,mejora
+in spite of,a pesar de
+inadequate,inadecuado
+incident,incidente
+inclined,inclinado
+include,incluir
+income,ingresos
+incorporate,incorporar
+increase,aumentar
+incredible,increíble
+indeed,en efecto
+independence,independencia
+independent,independiente
+indicate,indicar
+indication,indicación
+indirect,indirecto
+individual,individual
+industrial,industrial
+industrious,trabajador
+industry,industria
+inequality,desigualdad
+inevitable,inevitable
+infection,infección
+inflation,inflación
+influence,influir
+inform,informar
+informal,informal
+inhabit,habitar
+inhabitant,habitante
+inherent,inherente
+inherit,heredar
+initial,inicial
+initiate,iniciar
+injure,lesionar
+injured,herido
+injury,lesión
+inland,interior
+inner,interior
+innocent,inocente
+innovate,innovar
+innovation,innovación
+inquire,indagar
+inquiry,consulta
+insert,insertar
+insight,perspectiva
+inspect,inspeccionar
+inspire,inspirar
+install,instalar
+instance,ejemplo
+instant,instantáneo
+institute,instituto
+institution,institución
+instruct,instruir
+instruction,instrucción
+insult,insultar
+insurance,seguro
+integrate,integrar
+intellectual,intelectual
+intelligence,inteligencia
+intelligent,inteligente
+intend,tener la intención
+intense,intenso
+intention,intención
+interact,interactuar
+interaction,interacción
+interest,interés
+interested,interesado
+interfere,interferir
+internal,interno
+international,internacional
+interpret,interpretar
+interpretation,interpretación
+interrupt,interrumpir
+intervene,intervenir
+intervention,intervención
+interview,entrevista
+intimate,íntimo
+intestines,intestinos
+introduce,presentar
+introduction,introducción
+invade,invadir
+invent,inventar
+invention,invención
+invest,invertir
+investigate,investigar
+investigation,investigación
+investment,inversión
+invisible,invisible
+invite me along,invítame a ir contigo
+invoice,factura
+involve,involucrar
+involved,involucrado
+involvement,participación
+island,isla
+isolate,aislar
+isolated,aislado
+issue,asunto
+jail,cárcel
+jealous,celoso
+jerk,"imbécil, tirón brusco"
+jog,trotar
+joint,conjunto
+journal,"revista, diario"
+journalist,periodista
+journey,viaje
+joy,alegría
+judge,juez
+judgment,juicio
+jungle,selva
+junk,"basura, trastos"
+jury,jurado
+just in case,por si acaso
+justice,justicia
+justify,justificar
+keen,"entusiasta, afilado"
+kept,"guardado, mantenido"
+key,clave
+keyboard,teclado
+kidnap,secuestrar
+kidney,riñón
+kin / kins,"parientes, familiares"
+kind,amable
+knee,rodilla
+knowledge,conocimiento
+knowledgeable,experto
+known,conocido
+lack,carencia
+laid,"establecido, puesto"
+lamb,cordero
+lame,"cojo, patético"
+land,aterrizar
+landscape,paisaje
+landslide,deslizamiento
+lane,"carril, vía"
+language,idioma
+laptop,portátil
+large,grande
+late,tarde
+latter,último
+laugh / laughter,"reír, risa"
+launch,lanzar
+law,ley
+lawyer,abogado
+layer,capa
+lazy,perezoso
+leader,líder
+leadership,liderazgo
+leading,principal
+leak,fuga
+lean,apoyarse
+learn,aprender
+learning,aprendizaje
+leather,cuero
+lecture,conferencia
+ledge,"estante, repisa"
+legal,legal
+leisure,ocio
+length,longitud
+lesson,lección
+level,nivelado
+liability,responsabilidad
+liberal,liberal
+liberty,libertad
+library,biblioteca
+lick,lamer
+liege,señor feudal
+light,ligero
+likely,probable
+limb,extremidad
+limit,limitar
+limitation,limitación
+limited,limitado
+linear,lineal
+link,enlace
+lips,labios
+liquid,líquido
+literal,literal
+literature,literatura
+litter,basura
+little,poco
+live,en vivo
+liver,hígado
+loam chin / loan shark,prestamista
+loan,préstamo
+local,local
+locate,localizar
+location,ubicación
+logic,lógica
+logical,lógico
+lonely,solitario
+long,largo
+look forward to,esperar con ganas
+look into,investigar
+loose,suelto
+loss,pérdida
+lost,perdido
+loud,ruidoso
+lousy,"pésimo, asqueroso"
+low,bajo
+loyal,leal
+lucky,afortunado
+luggage,equipaje
+lumber,aserradero
+lump,"bulto, terrón"
+lungs,pulmones
+lust,"lujuria, deseo"
+mad,loco
+magazine,revista
+magic,mágico
+magnetic,magnético
+main,principal
+maintain,mantener
+major,mayor
+majority,mayoría
+male,masculino
+mammal,mamífero
+manage,gestionar
+management,gestión
+manager,gerente
+manipulate,manipular
+manufacture,fabricar
+manufacturer,fabricante
+map,mapa
+march,marchar
+margin,margen
+marine,marino
+mark,marcar
+market,mercado
+mass,masa
+massive,masivo
+master,dominar
+match,emparejar
+mathematics,matemáticas
+matter,importar
+mature,maduro
+maximum,máximo
+mayor,alcalde
+mean,"significar, malo, tacaño"
+measure,"medida, medir"
+measurement,medición
+mechanism,mecanismo
+media,medios
+medical,médico
+medicine,medicina
+medium,medio
+meeting,reunión
+melt,derretirse
+memory,memoria
+mental,mental
+mention,mencionar
+mere,mero
+merge,fusionar
+message,mensaje
+messing me,molestándome
+messy,desordenado
+met,"conocido, reunido"
+method,método
+middle,medio
+mild,"suave, leve"
+military,militar
+mind,mente
+minor,menor
+minority,minoría
+miserable,miserable
+misleading,engañoso
+missing,desaparecido
+mistake,error
+mixed,mixto
+mobile,móvil
+model,modelo
+moderate,moderado
+modern,moderno
+modest,modesto
+modification,modificación
+modify,modificar
+moniker,apodo
+monitor,monitor
+monument,monumento
+moot,"discutible, irrelevante"
+moral,moral
+moreover,además
+mortgage,hipoteca
+moss,musgo
+motivate,motivar
+motor,motor
+mount,montar
+mountain,montaña
+mouth,boca
+movement,movimiento
+mud / muddy,"barro, embarrado"
+multiple,múltiple
+multiply,multiplicar
+murder,asesinato
+muscle,músculo
+museum,museo
+mute,mudo
+mutual,mutuo
+nail,clavo
+naive,ingenuo
+nap,siesta
+narrow,estrecho
+nasty,desagradable
+nation,nación
+national,nacional
+native,nativo
+natural,natural
+nature,naturaleza
+near,cercano
+neat,ordenado
+necessity,necesidad
+neck,cuello
+negative,negativo
+neglect,descuidar
+negotiate,negociar
+nerve,nervio
+nervous,nervioso
+nest,nido
+network,red
+neutral,neutral
+new,nuevo
+newbie,novato
+news,noticias
+newspaper,periódico
+next,siguiente
+nice,agradable
+nipple,pezón
+noble,noble
+noose,soga
+normal,normal
+north,norte
+notify,notificar
+notion,noción
+novel,novedoso
+nuclear,nuclear
+nuisance,molestia
+numb,entumecido
+number,número
+numerous,numeroso
+nurse,enfermera
+nutrition,nutrición
+oar,remo
+oath,juramento
+obese,obeso
+objective,objetivo
+oblivion,el olvido
+observation,observación
+observe,observar
+obstacle,obstáculo
+obtain,obtener
+obvious,obvio
+occasional,ocasional
+occupy,ocupar
+occur,ocurrir
+occurrence,suceso
+ocean,océano
+odd,"extraño, raro"
+offend,ofender
+offensive,ofensivo
+offer,oferta
+office,oficina
+official,oficial
+old,viejo
+omen,augurio
+omit,omitir
+only,único
+online,en línea
+open,abierto
+operate,operar
+operation,operación
+opportunity,oportunidad
+oppose,oponerse
+opposite,opuesto
+opposition,oposición
+opt,optar
+optimistic,optimista
+option,opción
+ordinary,ordinario
+organ,órgano
+organic,orgánico
+organization,organización
+organize,organizar
+origin,origen
+original,original
+originate,originar
+other,otro
+oud,laúd
+ought,debería
+outer,exterior
+outlaw,proscrito
+outline,esquema
+output,producción
+outstanding,destacado
+oven,horno
+overall,en general
+overcome,superar
+overlook,pasar por alto
+overpopulation,sobrepoblación
+overseas,en el extranjero
+overtime,horas extras
+owe a boon,deber un favor
+owe,deber
+oxygen,oxígeno
+ozone layer,capa de ozono
+pack,hacer la maleta
+pain,dolor
+palace,palacio
+pale,pálido
+panel,panel
+parallel,paralelo
+park,aparcar
+parliament,parlamento
+partial,parcial
+participant,participante
+participate,participar
+participation,participación
+particular,particular
+partner,socio
+partnership,asociación
+party,partido
+pass,aprobar
+passage,pasaje
+passenger,pasajero
+passport,pasaporte
+past,pasado
+path,camino
+patient,paciente
+pattern,patrón
+pawn,peón
+payment,pago
+peace,paz
+peaceful,pacífico
+peak,pico
+peasant,campesino
+peculiar,peculiar
+peek,"vistazo, asomarse"
+penalty,penalización
+pension,pensión
+percentage,porcentaje
+perception,percepción
+perceive,percibir
+perfect,perfecto
+perform,realizar
+performance,rendimiento
+perhaps,tal vez
+period,periodo
+permanent,permanente
+permission,permiso
+permit,permitir
+persist,persistir
+personnel,personal
+perspective,perspectiva
+persuade,persuadir
+pesticide,pesticida
+petty,pequeño
+phase,fase
+phenomenon,fenómeno
+philosophy,filosofía
+phrase,frase
+physical,físico
+physics,física
+pile,"pila, montón"
+pill,pastilla
+pilot,piloto
+pipes,tuberías
+pity,lástima
+place,colocar
+plain,liso
+planet,planeta
+planning,planificación
+plant,planta
+platform,plataforma
+plead,alegar
+pleasant,agradable
+pledge,promesa
+plot,tramar
+plunder,saquear
+podcast,podcast
+point out,señalar
+poison,veneno
+poking,hurgando
+polar,polar
+policy,política
+polite,educado
+political,político
+politician,político
+politics,política
+poll,encuesta
+pollute,contaminar
+pollution,contaminación
+poor,pobre
+popular,popular
+population,población
+port,puerto
+portion,porción
+position,posición
+positive,positivo
+possess,poseer
+possibility,posibilidad
+possible,posible
+post,publicar
+postpone,posponer
+potential,potencial
+pour,verter
+poverty,pobreza
+powerful,poderoso
+practical,práctico
+practice,práctica
+praise,"elogio, alabar"
+precious,precioso
+precise,preciso
+predict,predecir
+preference,preferencia
+pregnant,embarazada
+preparation,preparación
+prepare,preparar
+prescribe,prescribir
+prescription,receta médica
+presence,presencia
+present,presente
+presentation,presentación
+preserve,preservar
+president,presidente
+press,prensa
+pressure,presión
+pretend,fingir
+pretty,"bonito, bastante"
+prevent,prevenir
+prevention,prevención
+previous,previo
+price,precio
+primary,primario
+prime,óptimo
+principal,principal
+principle,principio
+print,imprimir
+prior,previo
+priority,prioridad
+prison,prisión
+privacy,privacidad
+private,privado
+probable,probable
+probe,"sonda, investigar"
+procedure,procedimiento
+proceed,proceder
+process,proceso
+produce,producir
+product,producto
+production,producción
+profession,profesión
+professional,profesional
+professor,profesor
+profile,perfil
+profit,beneficio económico
+profound,profundo
+program,programa
+progress,progreso
+progressive,progresivo
+prohibit,prohibir
+project,proyecto
+prominent,prominente
+promise,promesa
+promote,promover
+promotion,promoción
+prompt,provocar
+proper,adecuado
+property,propiedad
+proportion,proporción
+proposal,propuesta
+propose,proponer
+protect,proteger
+protection,protección
+protein,proteína
+protest,protestar
+proud,orgulloso
+prove,demostrar
+provide,proporcionar
+provision,provisión
+provoke,provocar
+psychological,psicológico
+psychology,psicología
+public,público
+publication,publicación
+publish,publicar
+puddle,charco
+pulse,pulso
+punish,castigar
+pup,cachorro
+purchase,comprar
+pure,puro
+purpose,propósito
+purse,bolso
+pursuit,búsqueda
+puzzle,desconcertar
+qualification,cualificación
+qualify,clasificar
+quality,calidad
+quantity,cantidad
+quarter,cuarto
+question,pregunta
+queues,colas
+quick,rápido
+quiet,silencioso
+quit,renunciar
+quote,citar
+race,raza
+radiation,radiación
+radical,radical
+radio,radio
+rail,ferrocarril
+railway,vía férrea
+rainforest,selva tropical
+raise,aumentar
+rampage,"alboroto, arrasar"
+random,aleatorio
+range,rango
+rape,violación
+rapid,rápido
+rare,raro
+rascal,"bribón, pícaro"
+rash,"sarpullido, imprudente"
+rate,tasa
+ratio,proporción
+raw,crudo
+reach,alcanzar
+react,reaccionar
+reaction,reacción
+read,leer
+ready,listo
+real,real
+realistic,realista
+reality,realidad
+realize,darse cuenta
+realm,reino
+rear,trasero
+rearrange,reorganizar
+reason,razón
+reasonable,razonable
+rebel,rebelde
+recall,recordar
+receipt,recibo
+receive,recibir
+recent,reciente
+recognize,reconocer
+recognition,reconocimiento
+recommend,recomendar
+recommendation,recomendación
+record,grabar
+recover,recuperarse
+recovery,recuperación
+recruit,reclutar
+recycle,reciclar
+red,rojo
+reduce,reducir
+reduction,reducción
+reference,referencia
+refill,rellenar
+reflect,reflexionar
+reflection,reflexión
+reform,reforma
+refund,reembolso
+refuse,rechazar
+regard,considerar
+region,región
+regional,regional
+register,registrar
+regret,arrepentirse
+regular,regular
+regulate,regular
+regulation,regulación
+reject,rechazar
+rejection,rechazo
+relate,relacionar
+relation,relación
+relationship,relación
+relative,relativo
+relax,relajarse
+release,liberar
+relevance,relevancia
+relevant,relevante
+reliable,fiable
+relied,confió
+relief,alivio
+religion,religión
+religious,religioso
+relish,saborear
+rely,confiar
+remain,permanecer
+remark,comentar
+remedy,remedio
+remember,recordar
+remind,recordar
+remote,remoto
+remove,quitar
+renewable,renovable
+rent,alquilar
+repair,reparar
+repeat,repetir
+replace,reemplazar
+reply,responder
+report,informar
+reporter,reportero
+represent,representar
+representative,representante
+reproduce,reproducir
+republic,república
+request,solicitar
+require,requerir
+requirement,requisito
+rescue,rescatar
+research,investigar
+reservation,reserva
+reserve,reservar
+resign,renunciar
+resist,resistir
+resolve,resolver
+resort,centro turístico
+resource,recurso
+respect,respeto
+respond,responder
+restore,restaurar
+restrict,restringir
+result,resultado
+retail,venta al por menor
+retire,jubilarse
+retrace,desandar
+retrieval,recuperación
+retribution,venganza
+reuse,reutilizar
+revenue,ingresos
+review,reseña
+revise,revisar
+revolution,revolución
+rid,deshacerse de
+ride,montar
+right,derecho
+riot,disturbio
+rise,elevar
+risk,riesgo
+road,carretera
+roam,deambular
+roar,rugido
+rob,robar
+rogue,"pícaro, solitario"
+roof,techo
+rook,"torre de ajedrez, grajo"
+rough,"rudo, bruto"
+roundly,rotundamente
+route,ruta
+royal beggar,mendigo real
+rubbed,frotado
+rubbish,basura
+rug,alfombra pequeña
+rule,regla
+rural,rural
+sage,sabio
+sail,navegar
+salary,salario
+sales,ventas
+sanctuary,santuario
+satellite,satélite
+save,guardar
+scale,escala
+scandal,escándalo
+scan,escanear
+scar,cicatriz
+scavenger,carroñero
+scenery,paisaje
+schedule,horario
+scholarship,beca
+science,ciencia
+score,puntuación
+scout,explorador
+scratch,rascar
+screen,pantalla
+screw,tornillo
+scum,escoria
+sea,mar
+seal,"sello, foca"
+search,buscar
+seat,asiento
+secondary,secundario
+secure,seguro
+security,seguridad
+semester,semestre
+seminar,seminario
+senate,senado
+sentence,condena
+series,serie
+server,servidor
+set,configurar
+set in,establecerse
+settings,ajustes
+settle,establecerse
+settlement,acuerdo
+severe,severo
+shabby,desaliñado
+shade,sombra
+shake,agitar
+shards,fragmentos
+share,compartir
+sharp,afilado
+shatter,romper
+shave,afeitar
+shelter,refugio
+shift,turno
+ship,barco
+shock,conmoción
+shoot / shot,disparar
+shore,orilla
+shot on sight,disparar a la vista
+shoulders,hombros
+showers,chubascos
+shroud,sudario
+shudder,estremecer
+shutter,cerrar
+sick,enfermo
+sight,vista
+sightless,invisible
+sightseeing,turismo
+sign,señal
+signal,señal
+signature,firma
+silk,seda
+silly,tonto
+since,desde
+sink,hundir
+skeleton,esqueleto
+skill,habilidad
+skin,piel
+slain,asesinado
+slams,golpes
+slander,calumnia
+slaughter,matanza
+slayer,asesino
+sleep,dormir
+slumber,sueño
+slut,puta
+sly,astuto
+smart,inteligente
+smog,niebla tóxica
+smmugle,contrabandear
+sneeze,estornudar
+social,social
+society,sociedad
+software,software
+soil,suelo
+solar,solar
+solve,resolver
+sorcerer,hechicero
+sore,adolorido
+sorrow,pena
+source,fuente
+south,sur
+spare / spare me,de repuesto / ahórrame
+spark,chispa
+spear,lanza
+species,especie
+speed,velocidad
+spill,derrame
+spinal cord,médula espinal
+spine,columna vertebral
+spite,rencor
+spleen,bazo
+spoiled / spoiled milk,"mimado, estropeado"
+spoils,botín
+sponsor,patrocinador
+spread,difundir
+spring,primavera
+stain / stained,mancha
+stake,apostar
+staring,mirando fijamente
+startled,sobresaltado
+starve,morir de hambre
+state,estado
+station,estación
+status,estatus
+stay,estancia
+steady,firme
+steal,robar
+steam,vapor
+steer,dirigir
+stick the spoon in,meter la cuchara
+stiff,rígido
+still,todavía
+stock,inventario
+stomach,estómago
+stop,parada
+storm,tormenta
+strait,estrecho
+strategy,estrategia
+straw,paja
+stray,extraviado
+stream,arroyo
+street,calle
+strenuously,enérgicamente
+stress,estrés
+strike,huelga
+stripe,raya
+stroke,derrame cerebral
+structure,estructura
+student,estudiante
+studio,estudio
+study,estudiar
+stuff,cosa
+stung,picado
+sub,metro
+subject,asignatura
+subscribe,suscribirse
+suburb,suburbio
+sue,demandar
+suffer,sufrir
+suit you,te queda bien
+suitcase,maleta
+sulk,enfurruñarse
+summary,resumen
+summit,cumbre
+summon my steed,invocar a mi corcel
+supply,suministro
+supposed,supuesto
+supreme,supremo
+surface,superficie
+surgeon,cirujano
+surgery,cirugía
+surge,aumento
+surround,rodear
+survival,supervivencia
+survive,sobrevivir
+suspect,sospechoso
+sustainability,sostenibilidad
+sustainable,sostenible
+swallow,tragar
+sweat,sudor
+sweep,barrer
+swelling,hinchazón
+swing,columpio
+syllabus,programa
+symptom,síntoma
+syndrome,síndrome
+system,sistema
+tablet,tableta
+tailored,hecho a medida
+talent,talento
+target,objetivo
+tarnish,deslustrar
+task,tarea
+tax,impuesto
+teach,enseñar
+tear,lágrima
+tease,burlarse
+tech,tecnología
+television,televisión
+temperature,temperatura
+tend,tender a
+term,trimestre
+terminal,terminal
+territory,territorio
+terror,terror
+test,prueba
+tetchy,irascible
+text,texto
+the gust,la ráfaga
+theft,robo
+theory,teoría
+therefore,por lo tanto
+thief,ladrón
+thigh,muslo
+think,pensar
+threat,amenaza
+threaten,amenazar
+throat,garganta
+thruful,sincero
+thug,matón
+thumb,pulgar
+ticket,billete
+tide,marea
+tie / ties,atar / corbata
+tight,apretado
+till,hasta
+tinkering PCs,arreglando PCs
+tire,neumáticos
+tissue,tejido
+title,título
+toes,dedos del pie
+tomb,tumba
+tongue,lengua
+tooth,diente
+topic,tema
+tore,rompió
+tornado,tornado
+toss,lanzar
+tour,gira
+tourism,turismo
+tourist,turista
+towel,toalla
+toxic,tóxico
+track,pista
+trade,comercio
+tradition,tradición
+traffic,tráfico
+trail,rastro
+train,tren
+transfer,traslado
+transplant,trasplante
+transport,transporte
+travel,viajar
+treasure,tesoro
+treat,tratar
+treatment,tratamiento
+treaty,tratado
+trend,tendencia
+trial,juicio
+trip,viaje corto
+truck,camión
+trump,superar
+tsunami,tsunami
+turf,césped
+tutor,tutor
+type,teclear
+typhoon,tifón
+understand,entender
+unemployed,desempleado
+unhinge,desquiciar
+union,sindicato
+university,universidad
+unless,a menos que
+unsight / unsighted,sin vista
+until,hasta
+unveiled,revelado
+update,actualizar
+upload,subir
+upon,sobre
+urban,urbano
+user,usuario
+usually,generalmente
+vacancy,vacante
+vacation,vacaciones
+vagrant,vagabundo
+valley,valle
+value,valor
+veggies,verduras
+vehicle,vehículo
+vein,vena
+version,versión
+vessel,vasija
+vet my victims,examinar a mis víctimas
+vicinity,vecindad
+victim,víctima
+video,vídeo
+view,vista
+viewer,espectador
+village,pueblo
+violence,violencia
+virus,virus
+vision,visión
+visit,visitar
+vitamin,vitamina
+vocabulary,vocabulario
+volcano,volcán
+vote,votar
+voyage,viaje
+vulture,buitre
+wage,salario
+waist,cintura
+wait,esperar
+walk,caminar
+wander,deambular
+war,guerra
+ward,pabellón
+ware,artículos
+warp,deformar
+warrant,orden
+waste,desperdicio
+waterfall,cascada
+wave,ola
+way,camino
+wealth,riqueza
+weapon,arma
+weary,cansado
+weasel,comadreja
+web,web
+website,sitio web
+weight,peso
+welfare,bienestar
+west,oeste
+whatever,lo que sea
+wheel,rueda
+whelming,abrumador
+whether I can,si puedo
+while,mientras
+whistle,silbido
+who dares wins,quien arriesga gana
+whore,puta
+wicked,malvado
+wide,ancho
+widespread,extendido
+wield,empuñar
+wild,salvaje
+wildlife,vida silvestre
+willingly,de buena gana
+willow,sauce
+wind turbine,turbina eólica
+wireless,inalámbrico
+wisdom,sabiduría
+witness,testigo
+work,trabajo
+world,mundo
+wound,herida
+wreck / wrecked,naufragio / destrozado
+x-ray,rayos x
+yard,patio
+yield,ceder
+youth,juventud`; 
+    // ^ (Reemplaza este bloque con tus 1000 palabras reales) ^
+
+    // --- LÓGICA DE PROCESAMIENTO DE DATOS ---
+    const WORDS_PER_BLOCK = 50;
+    const QUESTIONS_PER_ROUND = 20;
+    let vocabulary = [];
+    let blocks = [];
+
+    // Variables de estado del juego
+    let currentBlockIndex = -1;
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    const appDiv = document.getElementById('app');
+
+    function init() {
+        parseCSV();
+        createBlocks();
+        renderMenu();
+    }
+
+    function parseCSV() {
+        const lines = rawCSV.split('\n');
+        lines.forEach(line => {
+            if (line.includes(',')) {
+                // Previene errores si la palabra en español tiene comas entre comillas
+                const parts = line.split(','); 
+                const en = parts[0].trim();
+                const es = parts.slice(1).join(',').replace(/"/g, '').trim();
+                if (en && es) vocabulary.push({ en, es });
+            }
+        });
+    }
+
+    function createBlocks() {
+        for (let i = 0; i < vocabulary.length; i += WORDS_PER_BLOCK) {
+            blocks.push(vocabulary.slice(i, i + WORDS_PER_BLOCK));
+        }
+    }
+
+    // --- UTILIDADES ---
+    // Mezcla un array aleatoriamente (Algoritmo Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // --- LÓGICA DEL JUEGO ---
+    function startQuiz(blockIndex) {
+        currentBlockIndex = blockIndex;
+        score = 0;
+        currentQuestionIndex = 0;
+        
+        // Seleccionamos N preguntas aleatorias de este bloque
+        let blockWords = [...blocks[blockIndex]];
+        shuffleArray(blockWords);
+        currentQuestions = blockWords.slice(0, Math.min(QUESTIONS_PER_ROUND, blockWords.length));
+        
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const currentWord = currentQuestions[currentQuestionIndex];
+        
+        // Generar distractores (respuestas incorrectas)
+        let options = [currentWord.es];
+        let attempts = 0;
+        
+        while (options.length < 4 && attempts < 100) {
+            // Cogemos una palabra aleatoria de todo el vocabulario
+            let randomWord = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+            if (!options.includes(randomWord.es)) {
+                options.push(randomWord.es);
+            }
+            attempts++;
+        }
+        
+        shuffleArray(options);
+
+        // Renderizar la interfaz
+        const progress = `Pregunta ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+        const blockName = `Bloque ${currentBlockIndex + 1}`;
+
+        appDiv.innerHTML = `
+            <div class="stats">
+                <span>${blockName}</span>
+                <span>${progress}</span>
+            </div>
+            <div class="question-box">${currentWord.en}</div>
+            <div class="options-grid">
+                ${options.map((opt, i) => `
+                    <button class="btn opt-${i}" onclick="checkAnswer('${opt}', '${currentWord.es}', this)">
+                        ${opt}
+                    </button>
+                `).join('')}
+            </div>
+            <button class="action-btn" onclick="renderMenu()" style="background-color: #eee; margin-top: 30px;">Salir al Menú</button>
+        `;
+    }
+
+    function checkAnswer(selectedAnswer, correctAnswer, btnElement) {
+        const buttons = document.querySelectorAll('.options-grid .btn');
+        buttons.forEach(btn => btn.disabled = true); // Bloquear clics
+
+        if (selectedAnswer === correctAnswer) {
+            btnElement.classList.add('correct');
+            score++;
+        } else {
+            btnElement.classList.add('wrong');
+            // Iluminar la correcta
+            buttons.forEach(btn => {
+                if (btn.innerText.trim() === correctAnswer) {
+                    btn.classList.add('correct');
+                }
+            });
+        }
+
+        // Agregar botón de continuar
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'action-btn';
+        nextBtn.innerText = currentQuestionIndex < currentQuestions.length - 1 ? 'Siguiente' : 'Ver Resultados';
+        nextBtn.onclick = nextQuestion;
+        appDiv.appendChild(nextBtn);
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        const percentage = Math.round((score / currentQuestions.length) * 100);
+        let message = '';
+        if(percentage >= 90) message = '¡Nivel B2 dominado! 🌟';
+        else if(percentage >= 70) message = '¡Vas por muy buen camino! 🚀';
+        else message = 'Toca repasar este bloque un poco más. 💪';
+
+        appDiv.innerHTML = `
+            <h1 style="color:#46178f;">Resultados</h1>
+            <div class="big-score">${score} / ${currentQuestions.length}</div>
+            <h2>${percentage}% Aciertos</h2>
+            <p style="font-size: 1.2em; margin: 20px 0;">${message}</p>
+            <button class="action-btn" onclick="startQuiz(${currentBlockIndex})">Repetir Bloque</button>
+            <button class="action-btn" onclick="renderMenu()" style="background-color: #eee;">Volver al Menú</button>
+        `;
+    }
+
+    function renderMenu() {
+        appDiv.innerHTML = `
+            <div class="menu-title">Vocabulario B2</div>
+            <div class="menu-subtitle">Total de palabras cargadas: <b>${vocabulary.length}</b></div>
+            <div class="menu-grid">
+                ${blocks.map((block, index) => {
+                    const startNum = (index * WORDS_PER_BLOCK) + 1;
+                    const endNum = startNum + block.length - 1;
+                    return `
+                        <button class="menu-btn" onclick="startQuiz(${index})">
+                            Bloque ${index + 1}<br>
+                            <span style="font-size: 0.8em; font-weight: normal;">Palabras ${startNum} - ${endNum}</span>
+                        </button>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    // Iniciar aplicación
+    init();
+
+</script>
+</body>
+</html>
